@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Poker Hand Calculator</title>
+  <title>Poker Probability Calculator</title>
   <style>
-    /* Styling for modern UI */
+    /* Clean and modern styling */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -15,28 +15,22 @@
       background: #f7f9fc;
       margin: 0;
     }
-    h1, h2 {
+    h1 {
       color: #333;
     }
     section {
       background: #fff;
       border-radius: 8px;
-      padding: 15px 20px;
+      padding: 15px;
       margin: 10px;
       width: 100%;
       max-width: 500px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input[type="text"], select, input[type="number"] {
+    input, select {
       width: 100%;
       padding: 8px;
-      margin-bottom: 10px;
-      font-size: 1rem;
+      margin: 5px 0 15px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -62,21 +56,25 @@
   </style>
 </head>
 <body>
-  <h1>Poker Hand Calculator</h1>
+  <h1>Poker Probability Calculator</h1>
+
+  <!-- Input Section for Hole Cards -->
   <section>
-    <h2>Your Hand</h2>
-    <label>Card 1:</label>
-    <input type="text" id="card1-rank" placeholder="Rank (e.g., A, K, Q, 10)" />
-    <select id="card1-suit">
+    <h2>Your Hole Cards</h2>
+    <label for="hole-card-1-rank">Card 1 Rank:</label>
+    <input id="hole-card-1-rank" type="text" placeholder="e.g., A, K, 10" />
+    <label for="hole-card-1-suit">Card 1 Suit:</label>
+    <select id="hole-card-1-suit">
       <option value="s">♠</option>
       <option value="h">♥</option>
       <option value="d">♦</option>
       <option value="c">♣</option>
     </select>
 
-    <label>Card 2:</label>
-    <input type="text" id="card2-rank" placeholder="Rank (e.g., A, K, Q, 10)" />
-    <select id="card2-suit">
+    <label for="hole-card-2-rank">Card 2 Rank:</label>
+    <input id="hole-card-2-rank" type="text" placeholder="e.g., A, K, 10" />
+    <label for="hole-card-2-suit">Card 2 Suit:</label>
+    <select id="hole-card-2-suit">
       <option value="s">♠</option>
       <option value="h">♥</option>
       <option value="d">♦</option>
@@ -84,104 +82,99 @@
     </select>
   </section>
 
+  <!-- Betting Section -->
   <section>
-    <h2>Community Cards</h2>
-    <!-- Allow up to 5 community cards -->
-    <label>Card 1:</label>
-    <input type="text" class="community-rank" placeholder="Rank" />
-    <select class="community-suit">
-      <option value="">--</option>
-      <option value="s">♠</option>
-      <option value="h">♥</option>
-      <option value="d">♦</option>
-      <option value="c">♣</option>
-    </select>
-
-    <label>Card 2:</label>
-    <input type="text" class="community-rank" placeholder="Rank" />
-    <select class="community-suit">
-      <option value="">--</option>
-      <option value="s">♠</option>
-      <option value="h">♥</option>
-      <option value="d">♦</option>
-      <option value="c">♣</option>
-    </select>
-
-    <label>Card 3:</label>
-    <input type="text" class="community-rank" placeholder="Rank" />
-    <select class="community-suit">
-      <option value="">--</option>
-      <option value="s">♠</option>
-      <option value="h">♥</option>
-      <option value="d">♦</option>
-      <option value="c">♣</option>
-    </select>
-
-    <label>Card 4:</label>
-    <input type="text" class="community-rank" placeholder="Rank" />
-    <select class="community-suit">
-      <option value="">--</option>
-      <option value="s">♠</option>
-      <option value="h">♥</option>
-      <option value="d">♦</option>
-      <option value="c">♣</option>
-    </select>
-
-    <label>Card 5:</label>
-    <input type="text" class="community-rank" placeholder="Rank" />
-    <select class="community-suit">
-      <option value="">--</option>
-      <option value="s">♠</option>
-      <option value="h">♥</option>
-      <option value="d">♦</option>
-      <option value="c">♣</option>
-    </select>
+    <h2>Betting Details</h2>
+    <label for="money-on-table">Total Money in Pot:</label>
+    <input id="money-on-table" type="number" placeholder="Enter the current pot size" />
   </section>
 
-  <button id="calcBtn">Calculate Best Hand</button>
+  <button id="calculate">Calculate Winning Probability</button>
 
+  <!-- Results Section -->
   <div class="results" id="results">
-    <!-- Results will appear here -->
+    <!-- Dynamic results will populate here -->
   </div>
 
-  <!-- Load pokersolver library -->
+  <!-- Include pokersolver -->
   <script src="https://unpkg.com/pokersolver"></script>
   <script>
-    // Format card into the format expected by pokersolver (e.g., "As", "Kc")
     function formatCard(rank, suit) {
       return rank.toUpperCase() + suit;
     }
 
-    // Gather input and calculate the best possible hand
-    document.getElementById('calcBtn').addEventListener('click', () => {
-      const hand = [
-        formatCard(document.getElementById('card1-rank').value, document.getElementById('card1-suit').value),
-        formatCard(document.getElementById('card2-rank').value, document.getElementById('card2-suit').value)
-      ];
+    function simulateWinProbability(holeCards, iterations = 1000) {
+      const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+      const suits = ['s', 'h', 'd', 'c'];
+      const deck = [];
 
-      const communityCards = [];
-      const communityRanks = document.querySelectorAll('.community-rank');
-      const communitySuits = document.querySelectorAll('.community-suit');
-      for (let i = 0; i < communityRanks.length; i++) {
-        const rank = communityRanks[i].value;
-        const suit = communitySuits[i].value;
-        if (rank && suit) {
-          communityCards.push(formatCard(rank, suit));
+      // Generate the full deck
+      ranks.forEach(rank => {
+        suits.forEach(suit => {
+          deck.push(formatCard(rank, suit));
+        });
+      });
+
+      // Remove the player's hole cards from the deck
+      const availableDeck = deck.filter(card => !holeCards.includes(card));
+
+      let wins = 0;
+
+      for (let i = 0; i < iterations; i++) {
+        // Clone the deck for random draws
+        const simulatedDeck = [...availableDeck];
+        
+        // Randomly draw 5 community cards
+        const communityCards = [];
+        for (let j = 0; j < 5; j++) {
+          const randomIndex = Math.floor(Math.random() * simulatedDeck.length);
+          communityCards.push(simulatedDeck.splice(randomIndex, 1)[0]);
+        }
+
+        // Randomly assign 2 cards to an opponent
+        const opponentHoleCards = [];
+        for (let j = 0; j < 2; j++) {
+          const randomIndex = Math.floor(Math.random() * simulatedDeck.length);
+          opponentHoleCards.push(simulatedDeck.splice(randomIndex, 1)[0]);
+        }
+
+        // Evaluate hands using pokersolver
+        const playerHand = new PokerSolver.Hand([...holeCards, ...communityCards]);
+        const opponentHand = new PokerSolver.Hand([...opponentHoleCards, ...communityCards]);
+
+        if (playerHand.rank > opponentHand.rank) {
+          wins++;
         }
       }
 
-      try {
-        const playerHand = new PokerSolver.Hand([...hand, ...communityCards]);
-        const bestHand = playerHand.descr; // PokerSolver will provide the best hand description
+      return ((wins / iterations) * 100).toFixed(2); // Return win probability as a percentage
+    }
 
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = `
-          <h2>Results</h2>
-          <p><strong>Your Best Hand:</strong> ${bestHand}</p>
-        `;
-      } catch (error) {
-        alert("Please ensure that your input is valid (e.g., valid ranks and suits).");
+    document.getElementById('calculate').addEventListener('click', () => {
+      const holeCard1 = formatCard(
+        document.getElementById('hole-card-1-rank').value,
+        document.getElementById('hole-card-1-suit').value
+      );
+      const holeCard2 = formatCard(
+        document.getElementById('hole-card-2-rank').value,
+        document.getElementById('hole-card-2-suit').value
+      );
+
+      const moneyOnTable = parseFloat(document.getElementById('money-on-table').value);
+
+      if (!holeCard1 || !holeCard2 || isNaN(moneyOnTable)) {
+        alert("Please complete all fields.");
+        return;
       }
+
+      const winProbability = simulateWinProbability([holeCard1, holeCard2]);
+
+      document.getElementById('results').innerHTML = `
+        <h2>Results</h2>
+        <p>Your probability of winning is <strong>${winProbability}%</strong>.</p>
+        <p>Pot Size: <strong>${moneyOnTable}</strong></p>
+        <p>Advice: ${winProbability > 50 ? "You can consider continuing." : "It might be better to fold."}</p>
+      `;
     });
   </script>
 </body>
