@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Poker Hand Calculator</title>
+  <style>
+    /* Styling for modern UI */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background: #f7f9fc;
+      margin: 0;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], select, input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005a9e;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Poker Hand Calculator</h1>
+  <section>
+    <h2>Your Hand</h2>
+    <label>Card 1:</label>
+    <input type="text" id="card1-rank" placeholder="Rank (e.g., A, K, Q, 10)" />
+    <select id="card1-suit">
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+
+    <label>Card 2:</label>
+    <input type="text" id="card2-rank" placeholder="Rank (e.g., A, K, Q, 10)" />
+    <select id="card2-suit">
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+  </section>
+
+  <section>
+    <h2>Community Cards</h2>
+    <!-- Allow up to 5 community cards -->
+    <label>Card 1:</label>
+    <input type="text" class="community-rank" placeholder="Rank" />
+    <select class="community-suit">
+      <option value="">--</option>
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+
+    <label>Card 2:</label>
+    <input type="text" class="community-rank" placeholder="Rank" />
+    <select class="community-suit">
+      <option value="">--</option>
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+
+    <label>Card 3:</label>
+    <input type="text" class="community-rank" placeholder="Rank" />
+    <select class="community-suit">
+      <option value="">--</option>
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+
+    <label>Card 4:</label>
+    <input type="text" class="community-rank" placeholder="Rank" />
+    <select class="community-suit">
+      <option value="">--</option>
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+
+    <label>Card 5:</label>
+    <input type="text" class="community-rank" placeholder="Rank" />
+    <select class="community-suit">
+      <option value="">--</option>
+      <option value="s">♠</option>
+      <option value="h">♥</option>
+      <option value="d">♦</option>
+      <option value="c">♣</option>
+    </select>
+  </section>
+
+  <button id="calcBtn">Calculate Best Hand</button>
+
+  <div class="results" id="results">
+    <!-- Results will appear here -->
+  </div>
+
+  <!-- Load pokersolver library -->
+  <script src="https://unpkg.com/pokersolver"></script>
+  <script>
+    // Format card into the format expected by pokersolver (e.g., "As", "Kc")
+    function formatCard(rank, suit) {
+      return rank.toUpperCase() + suit;
+    }
+
+    // Gather input and calculate the best possible hand
+    document.getElementById('calcBtn').addEventListener('click', () => {
+      const hand = [
+        formatCard(document.getElementById('card1-rank').value, document.getElementById('card1-suit').value),
+        formatCard(document.getElementById('card2-rank').value, document.getElementById('card2-suit').value)
+      ];
+
+      const communityCards = [];
+      const communityRanks = document.querySelectorAll('.community-rank');
+      const communitySuits = document.querySelectorAll('.community-suit');
+      for (let i = 0; i < communityRanks.length; i++) {
+        const rank = communityRanks[i].value;
+        const suit = communitySuits[i].value;
+        if (rank && suit) {
+          communityCards.push(formatCard(rank, suit));
+        }
+      }
+
+      try {
+        const playerHand = new PokerSolver.Hand([...hand, ...communityCards]);
+        const bestHand = playerHand.descr; // PokerSolver will provide the best hand description
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = `
+          <h2>Results</h2>
+          <p><strong>Your Best Hand:</strong> ${bestHand}</p>
+        `;
+      } catch (error) {
+        alert("Please ensure that your input is valid (e.g., valid ranks and suits).");
+      }
+    });
+  </script>
+</body>
+</html>
